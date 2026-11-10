@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<style>
+  :root{--bleu:#00338D;--or:#FFCD00;--texte:#1F2937;--gris:#6B7280;--bord:#E5E7EB;--fond:#F5F7FA}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fond);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:var(--texte)}
+  .page{max-width:680px;margin:0 auto;padding-bottom:60px}
+  header{background:var(--bleu);color:#fff;padding:18px 16px}
+  header .marque{color:var(--or);font-size:11px;letter-spacing:1.4px}
+  header h1{margin:6px 0 10px;font-size:19px}
+  .rec{font-size:12.5px;opacity:.9;margin-bottom:6px}
+  .recline{display:flex;gap:8px;margin-bottom:7px}
+  .recline input{flex:1;padding:9px 10px;border:none;border-radius:7px;font-size:14px}
+  .recline button{width:38px;border:none;border-radius:7px;background:rgba(255,255,255,.2);
+    color:#fff;font-size:17px;cursor:pointer}
+  .plus{background:rgba(255,255,255,.15);border:none;color:#fff;padding:8px 12px;border-radius:7px;
+    font-size:13px;cursor:pointer;font-family:inherit}
+  #recherche{width:100%;margin-top:12px;padding:10px 12px;border:none;border-radius:8px;font-size:14px}
+  .filtre{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12.5px;cursor:pointer}
+
+  .carte{background:#fff;margin:12px 14px;padding:16px;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .cand{display:flex;align-items:center;gap:12px;cursor:pointer}
+  .cand img,.cand .vide{width:52px;height:52px;border-radius:50%;object-fit:cover;background:#E5EAF2;flex:none}
+  .cand .nom{font-weight:600;font-size:15px}
+  .cand .info{font-size:12.5px;color:var(--gris);margin-top:2px}
+  .puce{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:12px;margin-top:5px}
+  .attente{background:#EDF2FB;color:var(--bleu)}
+  .present{background:#DCFCE7;color:#15803D}
+  .absent{background:#F3F4F6;color:#6B7280}
+  .fait{background:#FEF9C3;color:#A16207}
+  .compteur{margin:12px 14px 0;font-size:12.5px;color:var(--gris)}
+
+  .retour{background:none;border:none;color:var(--bleu);font-size:14px;font-weight:600;
+    padding:14px 16px 0;cursor:pointer}
+  .entete{display:flex;gap:14px;align-items:center}
+  .entete img,.entete .vide{width:74px;height:74px;border-radius:50%;object-fit:cover;background:#E5EAF2;flex:none}
+  .entete h2{margin:0;font-size:18px;color:var(--bleu)}
+  .meta{font-size:12.5px;color:var(--gris);line-height:1.5;margin-top:4px}
+
+  h3{font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--bleu);margin:0 0 10px}
+  .rep{margin-bottom:12px}
+  .rep .q{font-size:12px;color:var(--gris);font-weight:600}
+  .rep .r{font-size:14px;white-space:pre-wrap}
+
+  details{border:1px solid var(--bord);border-radius:9px;margin-bottom:8px;background:#fff}
+  summary{padding:11px 13px;font-size:14px;font-weight:600;cursor:pointer;color:var(--bleu)}
+  details .corps{padding:0 13px 13px;font-size:13.5px;white-space:pre-wrap;line-height:1.55}
+
+  .note{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .note .lib{flex:1;font-size:13.5px;font-weight:600}
+  .note input{width:64px;padding:9px;border:1px solid var(--bord);border-radius:8px;font-size:15px;text-align:center}
+  .note .sur{font-size:12px;color:var(--gris)}
+
+  .total{background:#F3F6FB;border-left:4px solid var(--or);padding:12px;border-radius:7px;
+    font-size:14px;margin:6px 0 16px}
+  .avis{display:flex;gap:8px;flex-wrap:wrap}
+  .avis button{flex:1;min-width:100px;padding:11px;border:1px solid var(--bord);background:#fff;
+    border-radius:8px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit}
+  .avis button.sel[data-a="Favorable"]{background:#DCFCE7;border-color:#15803D;color:#15803D}
+  .avis button.sel[data-a="À discuter"]{background:#FEF9C3;border-color:#A16207;color:#A16207}
+  .avis button.sel[data-a="Défavorable"]{background:#FEE2E2;border-color:#B91C1C;color:#B91C1C}
+
+  textarea{width:100%;min-height:90px;padding:11px;border:1px solid var(--bord);border-radius:8px;
+    font-size:14px;font-family:inherit;resize:vertical}
+  label.check{display:flex;align-items:center;gap:9px;font-size:13.5px;margin:14px 0 8px;cursor:pointer}
+  input[type=text]{width:100%;padding:10px;border:1px solid var(--bord);border-radius:8px;font-size:14px}
+
+  .actions{display:flex;gap:10px;margin:16px 14px 0}
+  .actions button{flex:1;padding:14px;border:none;border-radius:9px;font-size:15px;font-weight:600;
+    cursor:pointer;font-family:inherit}
+  .valider{background:var(--bleu);color:#fff}
+  .abs{background:#fff;color:#B91C1C;border:1px solid #FCA5A5;flex:0 0 150px}
+  button[disabled]{opacity:.55;cursor:default}
+
+  .msg{margin:12px 14px;padding:11px 13px;border-radius:8px;font-size:13.5px;display:none}
+  .msg.err{background:#FEE2E2;color:#991B1B}
+  .msg.ok{background:#DCFCE7;color:#15803D}
+  .vide-liste{text-align:center;color:var(--gris);font-size:14px;padding:30px}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="marque">LIONS CLUB IHEC CARTHAGE</div>
+    <h1>Plateforme jury</h1>
+    <div class="rec">Recruteurs présents pour cet entretien :</div>
+    <div id="recruteurs"></div>
+    <button class="plus" id="btnPlus">+ Ajouter un recruteur</button>
+    <input type="search" id="recherche" placeholder="Rechercher un candidat…">
+    <label class="filtre">
+      <input type="checkbox" id="voirEvalues"> Afficher aussi les candidats déjà traités
+    </label>
+  </header>
+
+  <div id="msg" class="msg"></div>
+  <div id="liste"><div class="vide-liste">Chargement…</div></div>
+  <div id="fiche" style="display:none"></div>
+
+</div>
+
+<script>
+var JETON = '<?= jeton ?>';
+var etat = { candidats: [], fiche: null, avis: '' };
+
+if (!JETON) {
+  document.getElementById('liste').innerHTML =
+    '<div class="vide-liste">Lien invalide. Demande le bon lien au secrétariat.</div>';
+} else {
+  initRecruteurs();
+  document.getElementById('recherche').addEventListener('input', afficherListe);
+  document.getElementById('voirEvalues').addEventListener('change', afficherListe);
+  charger();
+}
+
+function initRecruteurs(){
+  var memo = [];
+  try { memo = JSON.parse(localStorage.getItem('recruteurs') || '[]'); } catch(e){}
+  if (!memo.length) memo = ['', ''];
+  memo.forEach(ajouterChamp);
+  document.getElementById('btnPlus').addEventListener('click', function(){ ajouterChamp(''); });
+}
+
+function ajouterChamp(valeur){
+  var z = document.getElementById('recruteurs');
+  var l = document.createElement('div');
+  l.className = 'recline';
+  var i = document.createElement('input');
+  i.type = 'text'; i.value = valeur || '';
+  i.placeholder = 'Nom du recruteur ' + (z.children.length + 1);
+  i.addEventListener('input', memoriser);
+  var b = document.createElement('button');
+  b.type = 'button'; b.textContent = '×';
+  b.addEventListener('click', function(){
+    if (z.children.length <= 1) return;
+    z.removeChild(l); memoriser();
+  });
+  l.appendChild(i); l.appendChild(b);
+  z.appendChild(l);
+}
+
+function lireRecruteurs(){
+  return Array.prototype.map.call(
+    document.querySelectorAll('#recruteurs input'), function(i){ return i.value.trim(); }
+  ).filter(function(v){ return v; });
+}
+
+function memoriser(){
+  try { localStorage.setItem('recruteurs', JSON.stringify(lireRecruteurs())); } catch(e){}
+}
+
+function message(txt, type){
+  var m = document.getElementById('msg');
+  m.textContent = txt;
+  m.className = 'msg ' + (type || 'err');
+  m.style.display = txt ? 'block' : 'none';
+  if (txt) window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function charger(){
+  google.script.run.withSuccessHandler(function(r){
+    if (!r.ok) return message(r.message);
+    etat.candidats = r.candidats;
+    afficherListe();
+  }).withFailureHandler(function(e){ message('Erreur : ' + e.message); }).donneesJury(JETON);
+}
+
+function afficherListe(){
+  document.getElementById('fiche').style.display = 'none';
+  var l = document.getElementById('liste');
+  l.style.display = 'block';
+  l.innerHTML = '';
+
+  var recherche = (document.getElementById('recherche').value || '').toLowerCase().trim();
+  var voirEvalues = document.getElementById('voirEvalues').checked;
+
+  var visibles = etat.candidats.filter(function(c){
+    var traite = c.evaluations.length > 0 || c.presence === 'Absent';
+    if (traite && !voirEvalues) return false;
+    if (!recherche) return true;
+    return (c.nom + ' ' + c.departement + ' ' + c.heure + ' ' + c.date)
+             .toLowerCase().indexOf(recherche) >= 0;
+  });
+
+  var traites = etat.candidats.filter(function(c){
+    return c.evaluations.length > 0 || c.presence === 'Absent';
+  }).length;
+
+  var info = document.createElement('div');
+  info.className = 'compteur';
+  info.textContent = visibles.length + ' candidat(s) affiché(s) · ' + traites + ' déjà traité(s)';
+  l.appendChild(info);
+
+  if (!visibles.length){
+    var v = document.createElement('div');
+    v.className = 'vide-liste';
+    v.textContent = recherche ? 'Aucun candidat ne correspond à ta recherche.'
+                              : 'Tous les candidats ont été traités.';
+    l.appendChild(v);
+    return;
+  }
+
+  visibles.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'carte cand';
+    var puce = c.presence === 'Absent' ? '<span class="puce absent">Absent</span>'
+             : c.evaluations.length ? '<span class="puce fait">Évalué</span>'
+             : c.presence === 'Présent' ? '<span class="puce present">Présent</span>'
+             : '<span class="puce attente">En attente</span>';
+
+    d.innerHTML =
+      (c.photo ? '<img src="' + c.photo + '">' : '<div class="vide"></div>') +
+      '<div><div class="nom">' + c.nom + '</div>' +
+      '<div class="info">' + (c.date || '') + (c.heure ? ' à ' + c.heure : '') +
+      (c.salle ? ' · ' + c.salle : '') + '<br>' + c.departement + '</div>' + puce + '</div>';
+
+    d.addEventListener('click', function(){ ouvrirFiche(c.id); });
+    l.appendChild(d);
+  });
+}
+
+function ouvrirFiche(id){
+  if (!lireRecruteurs().length) return message('Écris d\'abord le nom des recruteurs présents.');
+  message('');
+  google.script.run.withSuccessHandler(function(f){
+    if (!f.ok) return message(f.message);
+    etat.fiche = f; etat.avis = '';
+    dessinerFiche(f);
+  }).withFailureHandler(function(e){ message('Erreur : ' + e.message); }).ficheCandidat(JETON, id);
+}
+
+function echapper(t){
+  return String(t || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function dessinerFiche(f){
+  document.getElementById('liste').style.display = 'none';
+  var z = document.getElementById('fiche');
+  z.style.display = 'block';
+
+  var reponses = f.reponses.filter(function(r){ return r.r; }).map(function(r){
+    return '<div class="rep"><div class="q">' + r.q + '</div><div class="r">' + echapper(r.r) + '</div></div>';
+  }).join('');
+
+  var guide = f.guide.commun.concat(f.guide.bloc).map(function(g){
+    return '<details><summary>' + echapper(g.titre) + '</summary>' +
+           '<div class="corps">' + echapper(g.texte) + '</div></details>';
+  }).join('');
+
+  var notes = f.themes.map(function(t, i){
+    return '<div class="note"><div class="lib">' + (i + 1) + '. ' + t + '</div>' +
+           '<input type="number" min="0" max="10" class="n" id="n' + i + '" value="">' +
+           '<span class="sur">/10</span></div>';
+  }).join('');
+
+  var blocsRemarques = lireRecruteurs().map(function(nom){
+    return '<div style="margin-bottom:14px">' +
+           '<div style="font-size:13px;font-weight:600;margin-bottom:6px">Remarques de ' +
+           echapper(nom) + '</div>' +
+           '<textarea class="rem" data-nom="' + echapper(nom) + '" ' +
+           'placeholder="Ce que tu retiens de l\'entretien…"></textarea></div>';
+  }).join('');
+
+  z.innerHTML =
+    '<button class="retour" id="btnRetour">← Retour à la liste</button>' +
+
+    '<div class="carte"><div class="entete">' +
+      (f.photo ? '<img src="' + f.photo + '">' : '<div class="vide"></div>') +
+      '<div><h2>' + f.nom + '</h2><div class="meta">' + f.id + ' · ' + f.annee +
+      '<br>' + f.creneau + '<br>' + f.telephone + '</div></div></div>' +
+      '<div class="meta" style="margin-top:12px"><b>Départements :</b> ' +
+      f.departements.join(' › ') +
+      '<br><b>Axe :</b> ' + f.axe + '<br><b>Compétences :</b> ' + (f.competences || '—') + '</div>' +
+    '</div>' +
+
+    (reponses ? '<div class="carte"><h3>Ses réponses</h3>' + reponses + '</div>' : '') +
+
+    '<div class="carte"><h3>Guide d\'entretien — ' + f.guide.departement + '</h3>' + guide + '</div>' +
+
+    '<div class="carte"><h3>Notation commune</h3>' + notes +
+      '<div class="total" id="total">Total : 0 / 80 (0 %)</div>' +
+      '<label class="check"><input type="checkbox" id="faute"> Faute éliminatoire</label>' +
+      '<input type="text" id="motif" placeholder="Motif de la faute (si cochée)">' +
+      '<h3 style="margin-top:18px">Avis final du jury</h3>' +
+      '<div class="avis">' +
+        '<button type="button" data-a="Favorable">Favorable</button>' +
+        '<button type="button" data-a="À discuter">À discuter</button>' +
+        '<button type="button" data-a="Défavorable">Défavorable</button>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="carte"><h3>Remarques par recruteur</h3>' + blocsRemarques + '</div>' +
+
+    '<div class="actions">' +
+      '<button class="abs" id="btnAbsent">Marquer absent</button>' +
+      '<button class="valider" id="btnValider">Enregistrer</button>' +
+    '</div>';
+
+  document.getElementById('btnRetour').addEventListener('click', function(){ charger(); });
+
+  Array.prototype.forEach.call(z.querySelectorAll('.n'), function(i){
+    i.addEventListener('input', majTotal);
+  });
+
+  Array.prototype.forEach.call(z.querySelectorAll('.avis button'), function(b){
+    b.addEventListener('click', function(){
+      Array.prototype.forEach.call(z.querySelectorAll('.avis button'), function(x){ x.classList.remove('sel'); });
+      b.classList.add('sel');
+      etat.avis = b.dataset.a;
+    });
+  });
+
+  document.getElementById('faute').addEventListener('change', function(){
+    if (this.checked){
+      Array.prototype.forEach.call(z.querySelectorAll('.avis button'), function(x){ x.classList.remove('sel'); });
+      z.querySelector('[data-a="Défavorable"]').classList.add('sel');
+      etat.avis = 'Défavorable';
+    }
+  });
+
+  document.getElementById('btnValider').addEventListener('click', enregistrer);
+  document.getElementById('btnAbsent').addEventListener('click', absent);
+  window.scrollTo({ top: 0 });
+}
+
+function lireNotes(){
+  var n = [];
+  for (var i = 0; i < 8; i++){
+    var v = document.getElementById('n' + i).value;
+    n.push(v === '' ? '' : Number(v));
+  }
+  return n;
+}
+
+function majTotal(){
+  var n = lireNotes();
+  var total = n.reduce(function(a,b){ return a + (Number(b) || 0); }, 0);
+  var pct = Math.round(total / 80 * 100);
+  var suggere = pct >= 70 ? 'Favorable' : (pct >= 50 ? 'À discuter' : 'Défavorable');
+  document.getElementById('total').innerHTML =
+    'Total : <b>' + total + ' / 80</b> (' + pct + ' %) — avis suggéré : <b>' + suggere + '</b>';
+}
+
+function enregistrer(){
+  var b = document.getElementById('btnValider');
+  var recruteurs = lireRecruteurs();
+  var notes = lireNotes();
+
+  var remarques = Array.prototype.map.call(document.querySelectorAll('.rem'), function(t){
+    return { nom: t.dataset.nom, texte: t.value.trim() };
+  });
+
+  if (!recruteurs.length) return message('Écris le nom des recruteurs présents.');
+  if (notes.some(function(v){ return v === ''; })) return message('Remplis les 8 notes.');
+  if (!etat.avis) return message('Choisis un avis final.');
+  if (!remarques.some(function(r){ return r.texte; }))
+    return message('Au moins un recruteur doit écrire ses remarques.');
+
+  memoriser();
+  b.disabled = true; b.textContent = 'Enregistrement…';
+
+  google.script.run.withSuccessHandler(function(r){
+    b.disabled = false; b.textContent = 'Enregistrer';
+    if (!r.ok) return message(r.message);
+    message('Évaluation enregistrée pour ' + etat.fiche.nom + '.', 'ok');
+    charger();
+  }).withFailureHandler(function(e){
+    b.disabled = false; b.textContent = 'Enregistrer';
+    message('Erreur : ' + e.message);
+  }).enregistrerEvaluation(JETON, {
+    id: etat.fiche.id,
+    recruteurs: recruteurs,
+    departement: etat.fiche.guide.departement,
+    notes: notes,
+    faute: document.getElementById('faute').checked,
+    motif: document.getElementById('motif').value,
+    avis: etat.avis,
+    remarques: remarques
+  });
+}
+
+function absent(){
+  if (!confirm('Marquer ' + etat.fiche.nom + ' comme absent(e) ?')) return;
+  var b = document.getElementById('btnAbsent');
+  b.disabled = true;
+  google.script.run.withSuccessHandler(function(r){
+    b.disabled = false;
+    if (!r.ok) return message(r.message);
+    message(etat.fiche.nom + ' marqué(e) absent(e).', 'ok');
+    charger();
+  }).withFailureHandler(function(e){
+    b.disabled = false; message('Erreur : ' + e.message);
+  }).marquerAbsent(JETON, etat.fiche.id, lireRecruteurs().join(' & '));
+}
+</script>
+</body>
+</html>

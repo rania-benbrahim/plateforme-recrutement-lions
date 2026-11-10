@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<style>
+  :root{--bleu:#00338D;--or:#FFCD00;--texte:#1F2937;--gris:#6B7280;--bord:#E5E7EB;--fond:#F5F7FA}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fond);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:var(--texte)}
+  .page{max-width:560px;margin:0 auto;padding-bottom:50px}
+  header{background:var(--bleu);color:#fff;padding:26px 20px;text-align:center}
+  header .marque{color:var(--or);font-size:12px;letter-spacing:1.5px;margin-bottom:8px}
+  header h1{margin:0;font-size:20px}
+  .carte{background:#fff;margin:16px;padding:22px;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .actuel{background:#F3F6FB;border-left:4px solid var(--or);padding:14px;border-radius:6px;
+    font-size:14px;line-height:1.6;margin-bottom:18px}
+  label{display:block;font-size:13.5px;font-weight:600;margin:14px 0 6px}
+  select{width:100%;padding:11px 12px;border:1px solid var(--bord);border-radius:8px;font-size:15px;background:#fff}
+  button{width:100%;padding:14px;border:none;border-radius:9px;background:var(--bleu);color:#fff;
+    font-size:15px;font-weight:600;margin-top:18px;cursor:pointer;font-family:inherit}
+  button[disabled]{opacity:.55;cursor:default}
+  .note{font-size:12.5px;color:var(--gris);margin-top:12px}
+  .erreur{background:#FEE2E2;color:#991B1B;padding:11px 13px;border-radius:8px;font-size:13.5px;
+    margin-bottom:14px;display:none}
+  .succes{text-align:center}
+  .rond{width:60px;height:60px;border-radius:50%;background:#DCFCE7;color:#15803D;font-size:30px;
+    line-height:60px;margin:0 auto 14px}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="marque">LIONS CLUB IHEC CARTHAGE</div>
+    <h1>Modifier mon créneau</h1>
+  </header>
+
+  <? if (!donnees.ok) { ?>
+    <div class="carte">
+      <p><?= donnees.message ?></p>
+      <p class="note">Si tu penses qu'il s'agit d'une erreur, contacte le club par email.</p>
+    </div>
+  <? } else { ?>
+    <div class="carte" id="bloc">
+      <div id="erreur" class="erreur"></div>
+
+      <p>Bonjour <?= donnees.prenom ?>,</p>
+      <div class="actuel">
+        <b>Ton créneau actuel</b><br><?= donnees.creneauActuel ?>
+      </div>
+
+      <? if (donnees.changementsRestants <= 0) { ?>
+        <p>Tu as déjà utilisé le nombre de changements autorisés. Contacte le club par email
+           si tu as un empêchement.</p>
+      <? } else { ?>
+        <label>Choisis un nouveau créneau</label>
+        <select id="creneau">
+          <option value="">Choisir…</option>
+          <? for (var i = 0; i < donnees.creneaux.length; i++) {
+               var c = donnees.creneaux[i]; ?>
+            <option value="<?= c.id ?>"><?= c.date ?> à <?= c.heure ?><?= c.salle ? ' · ' + c.salle : '' ?> — <?= c.restant ?> place(s)</option>
+          <? } ?>
+        </select>
+        <button id="btn" type="button">Confirmer le changement</button>
+        <p class="note">Changement(s) restant(s) : <?= donnees.changementsRestants ?>.
+           Ton ancien créneau redeviendra disponible pour les autres candidats.</p>
+      <? } ?>
+    </div>
+
+    <div class="carte succes" id="succes" style="display:none">
+      <div class="rond">✓</div>
+      <h2 style="font-size:18px;color:#00338D">Créneau modifié</h2>
+      <p id="texteSucces"></p>
+      <p class="note">Un email de confirmation vient de t'être envoyé.</p>
+    </div>
+
+    <script>
+      var ID = '<?= donnees.id ?>', JETON = '<?= donnees.jeton ?>';
+
+      function erreur(msg){
+        var e = document.getElementById('erreur');
+        e.textContent = msg; e.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      var btn = document.getElementById('btn');
+      if (btn) btn.addEventListener('click', function(){
+        var creneau = document.getElementById('creneau').value;
+        if (!creneau) return erreur('Merci de choisir un nouveau créneau.');
+        btn.disabled = true; btn.textContent = 'Enregistrement…';
+
+        google.script.run
+          .withSuccessHandler(function(r){
+            btn.disabled = false; btn.textContent = 'Confirmer le changement';
+            if (!r.ok) return erreur(r.message);
+            document.getElementById('bloc').style.display = 'none';
+            document.getElementById('texteSucces').textContent = 'Nouvel entretien : ' + r.creneau;
+            document.getElementById('succes').style.display = 'block';
+          })
+          .withFailureHandler(function(e){
+            btn.disabled = false; btn.textContent = 'Confirmer le changement';
+            erreur('Erreur : ' + e.message);
+          })
+          .changerCreneau(ID, JETON, creneau);
+      });
+    </script>
+  <? } ?>
+</div>
+</body>
+</html>

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<style>
+  :root{
+    --bleu:#00338D; --bleu-fonce:#002569; --or:#FFCD00;
+    --texte:#1F2937; --gris:#6B7280; --bord:#E5E7EB; --fond:#F5F7FA;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fond);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:var(--texte)}
+  .page{max-width:620px;margin:0 auto;padding:0 0 60px}
+  header{background:var(--bleu);color:#fff;padding:26px 20px 22px;text-align:center}
+  header .marque{color:var(--or);font-size:12px;letter-spacing:1.5px;margin-bottom:8px}
+  header h1{margin:0;font-size:22px}
+  header p{margin:8px 0 0;font-size:13px;opacity:.85}
+
+  .barre{display:flex;gap:6px;padding:16px 20px 0}
+  .barre div{flex:1;height:5px;border-radius:3px;background:var(--bord)}
+  .barre div.actif{background:var(--or)}
+  .compteur{padding:10px 20px 0;font-size:12px;color:var(--gris)}
+
+  .carte{background:#fff;margin:14px 16px;padding:20px;border-radius:12px;
+         box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  h2{font-size:17px;margin:0 0 4px;color:var(--bleu)}
+  .aide{font-size:12.5px;color:var(--gris);margin:0 0 18px}
+
+  label{display:block;font-size:13.5px;font-weight:600;margin:16px 0 6px}
+  label span.opt{font-weight:400;color:var(--gris)}
+  input[type=text],input[type=email],input[type=tel],input[type=date],select,textarea{
+    width:100%;padding:11px 12px;border:1px solid var(--bord);border-radius:8px;
+    font-size:15px;font-family:inherit;background:#fff;color:var(--texte)}
+  textarea{min-height:90px;resize:vertical}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--bleu);
+    box-shadow:0 0 0 3px rgba(0,51,141,.12)}
+
+  .choix{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+  .choix label{display:inline-flex;align-items:center;gap:7px;margin:0;font-weight:400;
+    font-size:13.5px;border:1px solid var(--bord);border-radius:20px;padding:8px 13px;
+    background:#fff;cursor:pointer}
+  .choix label.coche{border-color:var(--bleu);background:#EDF2FB}
+  .choix input{accent-color:var(--bleu)}
+
+  .photo{display:flex;align-items:center;gap:14px;margin-top:8px}
+  .apercu{width:78px;height:78px;border-radius:50%;background:#EDF0F5;border:2px dashed var(--bord);
+    object-fit:cover;flex:none}
+  .bouton-fichier{background:#EDF2FB;color:var(--bleu);border:1px solid #C7D6EE;padding:10px 14px;
+    border-radius:8px;font-size:13.5px;cursor:pointer;font-weight:600}
+  input[type=file]{display:none}
+
+  .nav{display:flex;gap:10px;margin:18px 16px 0}
+  button{flex:1;padding:14px;border:none;border-radius:9px;font-size:15px;font-weight:600;
+    cursor:pointer;font-family:inherit}
+  .suivant{background:var(--bleu);color:#fff}
+  .suivant:active{background:var(--bleu-fonce)}
+  .retour{background:#fff;color:var(--bleu);border:1px solid var(--bord);flex:0 0 110px}
+  button[disabled]{opacity:.55;cursor:default}
+
+  .erreur{background:#FEE2E2;color:#991B1B;padding:11px 13px;border-radius:8px;
+    font-size:13.5px;margin:14px 16px;display:none}
+  .creneau-info{font-size:12.5px;color:var(--gris);margin-top:6px}
+
+  .fini{text-align:center;padding:36px 24px}
+  .fini .rond{width:64px;height:64px;border-radius:50%;background:#DCFCE7;color:#15803D;
+    font-size:32px;line-height:64px;margin:0 auto 16px}
+  .fini h2{font-size:20px}
+  .recap{background:#F3F6FB;border-left:4px solid var(--or);padding:14px;border-radius:6px;
+    text-align:left;margin:18px 0;font-size:14px;line-height:1.6}
+  .chargement{text-align:center;padding:40px;color:var(--gris);font-size:14px}
+  .obligatoire{color:#B91C1C}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="marque">LIONS CLUB IHEC CARTHAGE</div>
+    <h1>Rejoins le club</h1>
+    <p>Formulaire de candidature · Mandat 2026-2027</p>
+  </header>
+
+  <div id="chargement" class="chargement">Chargement du formulaire…</div>
+
+  <div id="formulaire" style="display:none">
+    <div class="barre">
+      <div class="actif" data-etape="1"></div><div data-etape="2"></div>
+      <div data-etape="3"></div><div data-etape="4"></div>
+    </div>
+    <div class="compteur" id="compteur">Étape 1 sur 4</div>
+    <div id="erreur" class="erreur"></div>
+
+    <section class="carte" data-page="1">
+      <h2>Faisons connaissance</h2>
+      <p class="aide">Ces informations servent à te contacter.</p>
+
+      <label>Nom <span class="obligatoire">*</span></label>
+      <input type="text" id="nom">
+
+      <label>Prénom <span class="obligatoire">*</span></label>
+      <input type="text" id="prenom">
+
+      <label>Adresse email <span class="obligatoire">*</span></label>
+      <input type="email" id="email" placeholder="prenom.nom@email.com">
+
+      <label>Numéro de téléphone <span class="obligatoire">*</span></label>
+      <input type="tel" id="telephone" placeholder="20 123 456">
+
+      <label>Date de naissance <span class="opt">(facultatif)</span></label>
+      <input type="date" id="naissance">
+
+      <label>Année d'étude actuelle <span class="obligatoire">*</span></label>
+      <select id="annee"><option value="">Choisir…</option></select>
+    </section>
+
+    <section class="carte" data-page="2" style="display:none">
+      <h2>Tes préférences</h2>
+      <p class="aide">Classe les trois départements selon ton intérêt. Cela nous aide à orienter tes questions pendant l'entretien.</p>
+
+      <label>1<sup>er</sup> choix <span class="obligatoire">*</span></label>
+      <select id="dept1" class="dept"><option value="">Choisir…</option></select>
+
+      <label>2<sup>e</sup> choix <span class="obligatoire">*</span></label>
+      <select id="dept2" class="dept"><option value="">Choisir…</option></select>
+
+      <label>3<sup>e</sup> choix <span class="obligatoire">*</span></label>
+      <select id="dept3" class="dept"><option value="">Choisir…</option></select>
+
+      <label>Quel axe lionistique suscite le plus ton intérêt ? <span class="obligatoire">*</span></label>
+      <div class="choix" id="axes"></div>
+
+      <label>Coche les compétences que tu maîtrises</label>
+      <div class="choix" id="competences"></div>
+    </section>
+
+    <section class="carte" data-page="3" style="display:none">
+      <h2>Ta motivation</h2>
+      <p class="aide">Réponds avec tes mots, il n'y a pas de bonne ou de mauvaise réponse.</p>
+
+      <label>Pourquoi veux-tu rejoindre le Lions Club IHEC Carthage ? <span class="obligatoire">*</span></label>
+      <textarea id="pourquoi"></textarea>
+
+      <label>As-tu déjà une expérience associative ? Laquelle ?</label>
+      <textarea id="experience"></textarea>
+
+      <label>Qu'est-ce que tu peux apporter au club ?</label>
+      <textarea id="apport"></textarea>
+
+      <label>Quelles sont tes disponibilités ?</label>
+      <input type="text" id="disponibilites" placeholder="Soirs, week-ends…">
+
+      <label>Comment as-tu connu le club ?</label>
+      <input type="text" id="connu" placeholder="Instagram, un ami, l'IHEC…">
+    </section>
+
+    <section class="carte" data-page="4" style="display:none">
+      <h2>Photo et entretien</h2>
+      <p class="aide">La photo permet au jury de te reconnaître le jour de l'entretien.</p>
+
+      <label>Ta photo <span class="obligatoire">*</span></label>
+      <div class="photo">
+        <img id="apercu" class="apercu" alt="">
+        <div>
+          <label class="bouton-fichier" for="fichierPhoto">Ajouter ma photo</label>
+          <input type="file" id="fichierPhoto" accept="image/*">
+          <div class="creneau-info" id="nomPhoto">Aucune photo choisie</div>
+        </div>
+      </div>
+
+      <label>Choisis ton créneau d'entretien <span class="obligatoire">*</span></label>
+      <select id="creneau"><option value="">Choisir…</option></select>
+      <div class="creneau-info" id="infoCreneau"></div>
+
+      <div class="choix" style="margin-top:20px">
+        <label id="labelConsentement">
+          <input type="checkbox" id="consentement">
+          J'accepte que mes informations soient utilisées pour le recrutement du club.
+        </label>
+      </div>
+    </section>
+
+    <div class="nav">
+      <button type="button" class="retour" id="btnRetour" style="display:none">Retour</button>
+      <button type="button" class="suivant" id="btnSuivant">Continuer</button>
+    </div>
+  </div>
+
+  <div id="confirmation" class="carte fini" style="display:none">
+    <div class="rond">✓</div>
+    <h2>Candidature envoyée !</h2>
+    <p class="aide" id="texteConfirmation"></p>
+    <div class="recap" id="recap"></div>
+    <p class="aide">Un email de confirmation vient de t'être envoyé. Pense à vérifier tes spams.</p>
+  </div>
+
+</div>
+
+<script>
+var etape = 1, donnees = {}, photo = null, options = null;
+
+google.script.run.withSuccessHandler(demarrer).withFailureHandler(function(e){
+  document.getElementById('chargement').textContent =
+    'Impossible de charger le formulaire. Réessaie dans un instant.';
+}).donneesFormulaire();
+
+function demarrer(d){
+  options = d;
+  remplirSelect('annee', d.annees);
+  ['dept1','dept2','dept3'].forEach(function(id){ remplirSelect(id, d.departements); });
+  remplirChoix('axes', d.axes, 'radio', 'axe');
+  remplirChoix('competences', d.competences, 'checkbox', 'competence');
+  remplirCreneaux(d.creneaux);
+  document.getElementById('chargement').style.display = 'none';
+  document.getElementById('formulaire').style.display = 'block';
+}
+
+function remplirSelect(id, valeurs){
+  var s = document.getElementById(id);
+  valeurs.forEach(function(v){
+    var o = document.createElement('option'); o.value = v; o.textContent = v; s.appendChild(o);
+  });
+}
+
+function remplirChoix(conteneur, valeurs, type, nom){
+  var c = document.getElementById(conteneur);
+  c.innerHTML = '';
+  valeurs.forEach(function(v){
+    var l = document.createElement('label');
+    var i = document.createElement('input');
+    i.type = type; i.name = nom; i.value = v;
+    i.addEventListener('change', function(){
+      if (type === 'radio') {
+        Array.prototype.forEach.call(c.querySelectorAll('label'), function(x){ x.classList.remove('coche'); });
+      }
+      l.classList.toggle('coche', i.checked);
+    });
+    l.appendChild(i);
+    l.appendChild(document.createTextNode(' ' + v));
+    c.appendChild(l);
+  });
+}
+
+function remplirCreneaux(creneaux){
+  var s = document.getElementById('creneau');
+  s.innerHTML = '<option value="">Choisir…</option>';
+  if (!creneaux.length) {
+    s.innerHTML = '<option value="">Aucun créneau disponible pour le moment</option>';
+    return;
+  }
+  creneaux.forEach(function(c){
+    var o = document.createElement('option');
+    o.value = c.id;
+    o.textContent = c.date + ' à ' + c.heure + (c.salle ? ' · ' + c.salle : '') +
+                    ' — ' + c.restant + ' place' + (c.restant > 1 ? 's' : '');
+    s.appendChild(o);
+  });
+}
+
+function valeur(id){ return (document.getElementById(id).value || '').trim(); }
+function coches(nom){
+  return Array.prototype.map.call(
+    document.querySelectorAll('input[name="' + nom + '"]:checked'), function(i){ return i.value; });
+}
+function afficherErreur(msg){
+  var e = document.getElementById('erreur');
+  e.textContent = msg; e.style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function cacherErreur(){ document.getElementById('erreur').style.display = 'none'; }
+
+function valider(n){
+  if (n === 1){
+    if (!valeur('nom') || !valeur('prenom')) return 'Merci d\'indiquer ton nom et ton prénom.';
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(valeur('email'))) return 'Merci d\'indiquer une adresse email valide.';
+    if (!valeur('telephone')) return 'Merci d\'indiquer ton numéro de téléphone.';
+    if (!valeur('annee')) return 'Merci de choisir ton année d\'étude.';
+  }
+  if (n === 2){
+    var d = [valeur('dept1'), valeur('dept2'), valeur('dept3')];
+    if (d.some(function(x){ return !x; })) return 'Merci de classer les trois départements.';
+    if (new Set(d).size !== 3) return 'Chaque département ne peut être choisi qu\'une seule fois.';
+    if (!coches('axe').length) return 'Merci de choisir un axe lionistique.';
+  }
+  if (n === 3){
+    if (valeur('pourquoi').length < 15) return 'Explique en quelques mots pourquoi tu veux rejoindre le club.';
+  }
+  if (n === 4){
+    if (!photo) return 'Merci d\'ajouter ta photo.';
+    if (!valeur('creneau')) return 'Merci de choisir un créneau d\'entretien.';
+    if (!document.getElementById('consentement').checked) return 'Merci d\'accepter l\'utilisation de tes informations.';
+  }
+  return '';
+}
+
+function afficherEtape(n){
+  etape = n;
+  Array.prototype.forEach.call(document.querySelectorAll('[data-page]'), function(s){
+    s.style.display = (Number(s.dataset.page) === n) ? 'block' : 'none';
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.barre div'), function(b){
+    b.classList.toggle('actif', Number(b.dataset.etape) <= n);
+  });
+  document.getElementById('compteur').textContent = 'Étape ' + n + ' sur 4';
+  document.getElementById('btnRetour').style.display = n === 1 ? 'none' : 'block';
+  document.getElementById('btnSuivant').textContent = n === 4 ? 'Envoyer ma candidature' : 'Continuer';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.getElementById('btnRetour').addEventListener('click', function(){
+  cacherErreur(); afficherEtape(etape - 1);
+});
+
+document.getElementById('btnSuivant').addEventListener('click', function(){
+  var msg = valider(etape);
+  if (msg) return afficherErreur(msg);
+  cacherErreur();
+  if (etape < 4) return afficherEtape(etape + 1);
+  envoyer();
+});
+
+document.getElementById('creneau').addEventListener('change', function(){
+  var opt = this.options[this.selectedIndex];
+  document.getElementById('infoCreneau').textContent =
+    this.value ? 'Créneau sélectionné : ' + opt.textContent : '';
+});
+
+document.getElementById('labelConsentement').addEventListener('click', function(){
+  var c = document.getElementById('consentement');
+  setTimeout(function(){ document.getElementById('labelConsentement').classList.toggle('coche', c.checked); }, 0);
+});
+
+document.getElementById('fichierPhoto').addEventListener('change', function(e){
+  var fichier = e.target.files[0];
+  if (!fichier) return;
+  var lecteur = new FileReader();
+  lecteur.onload = function(ev){
+    var img = new Image();
+    img.onload = function(){
+      var max = 800, l = img.width, h = img.height;
+      if (l > h && l > max){ h = Math.round(h * max / l); l = max; }
+      else if (h > max){ l = Math.round(l * max / h); h = max; }
+      var c = document.createElement('canvas');
+      c.width = l; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, l, h);
+      var url = c.toDataURL('image/jpeg', 0.82);
+      photo = { base64: url.split(',')[1], type: 'image/jpeg' };
+      document.getElementById('apercu').src = url;
+      document.getElementById('nomPhoto').textContent = 'Photo ajoutée';
+      cacherErreur();
+    };
+    img.src = ev.target.result;
+  };
+  lecteur.readAsDataURL(fichier);
+});
+
+function envoyer(){
+  var b = document.getElementById('btnSuivant');
+  b.disabled = true; b.textContent = 'Envoi en cours…';
+
+  donnees = {
+    nom: valeur('nom'), prenom: valeur('prenom'), email: valeur('email'),
+    telephone: valeur('telephone'), naissance: valeur('naissance'), annee: valeur('annee'),
+    dept1: valeur('dept1'), dept2: valeur('dept2'), dept3: valeur('dept3'),
+    axe: coches('axe')[0] || '', competences: coches('competence'),
+    pourquoi: valeur('pourquoi'), experience: valeur('experience'), apport: valeur('apport'),
+    disponibilites: valeur('disponibilites'), connu: valeur('connu'),
+    creneau: valeur('creneau'), photo: photo
+  };
+
+  google.script.run
+    .withSuccessHandler(function(r){
+      b.disabled = false; b.textContent = 'Envoyer ma candidature';
+      if (!r.ok){
+        if (r.creneaux) remplirCreneaux(r.creneaux);
+        return afficherErreur(r.message);
+      }
+      document.getElementById('formulaire').style.display = 'none';
+      document.getElementById('erreur').style.display = 'none';
+      document.getElementById('texteConfirmation').textContent =
+        'Merci ' + donnees.prenom + ', ta candidature est bien enregistrée.';
+      document.getElementById('recap').innerHTML =
+        '<b>Numéro de candidat :</b> ' + r.id + '<br><b>Entretien :</b> ' + r.creneau;
+      document.getElementById('confirmation').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    })
+    .withFailureHandler(function(e){
+      b.disabled = false; b.textContent = 'Envoyer ma candidature';
+      afficherErreur('Envoi impossible : ' + e.message);
+    })
+    .enregistrerCandidature(donnees);
+}
+</script>
+</body>
+</html>
