@@ -29,10 +29,10 @@ Les évaluateurs notaient les candidats sur papier, puis le bureau devait regrou
 
 | Fichier | Rôle |
 |---|---|
-| `src/Code.gs` | Logique serveur : pages web, enregistrement des candidatures, créneaux, évaluations, emails |
-| `src/Candidature.html` | Formulaire de candidature |
-| `src/Creneau.html` | Page de modification du créneau |
-| `src/Jury.html` | Plateforme d'évaluation pour le jury |
+| `Code.gs` | Logique serveur : pages web, enregistrement des candidatures, créneaux, évaluations, emails |
+| `Candidature.html` | Formulaire de candidature |
+| `Creneau.html` | Page de modification du créneau |
+| `Jury.html` | Plateforme d'évaluation pour le jury |
 
 ## Configuration
 
@@ -51,14 +51,28 @@ En tant qu'Adjointe Secrétaire du club, j'ai conçu et développé l'ensemble d
 *Les données personnelles des candidats et des évaluateurs ont été masquées. Les captures du formulaire en ligne et de la plateforme jury utilisent des données fictives.*
 
 ### Avant / après : la candidature
-| Avant : formulaire papier | Après : formulaire en ligne (mobile) |
-|---|---|
-| ![Formulaire papier](images/formulaire-papier.png) | ![Formulaire en ligne](images/formulaire-en-ligne.png) |
+<table>
+<tr>
+<th>Avant : formulaire papier</th>
+<th>Après : formulaire en ligne (mobile)</th>
+</tr>
+<tr>
+<td valign="top" align="center"><img src="images/formulaire-papier.png" width="420"></td>
+<td valign="top" align="center"><img src="images/formulaire-en-ligne.png" width="260"></td>
+</tr>
+</table>
 
 ### Plateforme jury (mobile)
-| Liste des candidats du jour | Fiche d'évaluation |
-|---|---|
-| ![Liste jury](images/jury-liste.png) | ![Fiche jury](images/jury-fiche.png) |
+<table>
+<tr>
+<th>Liste des candidats du jour</th>
+<th>Notation et avis du jury</th>
+</tr>
+<tr>
+<td valign="top" align="center"><img src="images/jury-liste.png" width="260"></td>
+<td valign="top" align="center"><img src="images/jury-fiche.png" width="260"></td>
+</tr>
+</table>
 
 ### Base des candidats
 ![Base des candidats](images/base-candidats.png)
@@ -70,9 +84,19 @@ En tant qu'Adjointe Secrétaire du club, j'ai conçu et développé l'ensemble d
 ![Tableau de bord](images/tableau-de-bord.png)
 
 ### Emails automatiques
-| Confirmation de candidature | Acceptation | Affectation au département |
-|---|---|---|
-| ![Confirmation](images/email-confirmation.png) | ![Acceptation](images/email-acceptation.png) | ![Affectation](images/email-affectation.png) |
+<table>
+<tr>
+<th>Confirmation de candidature</th>
+<th>Acceptation</th>
+<th>Affectation au département</th>
+</tr>
+<tr>
+<td valign="top" align="center"><img src="images/email-confirmation.png" width="260"></td>
+<td valign="top" align="center"><img src="images/email-acceptation.png" width="260"></td>
+<td valign="top" align="center"><img src="images/email-affectation.png" width="260"></td>
+</tr>
+</table>
+
 
 ---
 
